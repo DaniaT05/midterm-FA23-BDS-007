@@ -54,10 +54,12 @@ pipeline {
     post {
         always {
             script {
+                def author = sh(returnStdout: true, script: 'git log -1 --format=%ae').trim()
+                echo "Sending email to commit author: ${author}"
                 def metrics = sh(returnStdout: true,
                     script: 'curl -s http://localhost:8000/metrics || echo "metrics unavailable"').trim()
                 emailext(
-                    to: 'qasimalik@gmail.com',
+                    to: author,
                     from: 'daniataj.dt@gmail.com',
                     subject: "[${env.REG}] Midterm pipeline ${currentBuild.currentResult} - build #${env.BUILD_NUMBER}",
                     body: "Student Reg No: ${env.REG}\nResult: ${currentBuild.currentResult}\nBuild: ${env.BUILD_URL}\nDocker Hub image: ${env.HUB_IMAGE}:latest\n\nMetrics:\n${metrics}\n"
